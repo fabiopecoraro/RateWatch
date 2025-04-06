@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RateWatch.Infrastructure.Data;
@@ -11,9 +12,11 @@ using RateWatch.Infrastructure.Data;
 namespace RateWatch.Infrastructure.Migrations
 {
     [DbContext(typeof(RateWatchDbContext))]
-    partial class RateWatchDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250406141652_SeedCurrencyWithDescriptionsAndIsActiveFlag")]
+    partial class SeedCurrencyWithDescriptionsAndIsActiveFlag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

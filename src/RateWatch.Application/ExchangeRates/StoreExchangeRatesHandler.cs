@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using RateWatch.Application.Interfaces;
+using RateWatch.Application.Services;
 using RateWatch.Domain.Entities;
 
 namespace RateWatch.Application.ExchangeRates;
@@ -8,7 +9,8 @@ namespace RateWatch.Application.ExchangeRates;
 public class StoreExchangeRatesHandler(
     IRateFetcher _fetcher,
     IExchangeRateRepository _repo,
-    IMapper _mapper) : IRequestHandler<StoreExchangeRatesCommand>
+    ICurrencyRepository _currencyRepository,
+    ExchangeRateMapper _mapper) : IRequestHandler<StoreExchangeRatesCommand>
 {
     public async Task Handle(StoreExchangeRatesCommand request, CancellationToken cancellationToken)
     {
@@ -16,7 +18,9 @@ public class StoreExchangeRatesHandler(
         if (day is null || await _repo.ExistsForDateAsync(day.Date, cancellationToken))
             return;
 
-        var records = _mapper.Map<List<ExchangeRateRecord>>(day);
+        var currencyMap = await _currencyRepository.GetCurrencyMapAsync(cancellationToken);
+
+        var records = _mapper.MapToRecords(day, currencyMap);
         await _repo.AddRatesAsync(records, cancellationToken);
     }
 }

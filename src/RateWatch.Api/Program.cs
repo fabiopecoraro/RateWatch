@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RateWatch.Api.Endpoints;
 using RateWatch.Application.ExchangeRates;
 using RateWatch.Application.Interfaces;
+using RateWatch.Application.Services;
 using RateWatch.Infrastructure.Data;
 using RateWatch.Infrastructure.ExternalServices;
 using RateWatch.Infrastructure.Hosted;
@@ -20,8 +21,12 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHttpClient<IRateFetcher, EcbRateFetcher>();
 builder.Services.AddScoped<IExchangeRateRepository, ExchangeRateRepository>();
+builder.Services.AddScoped<ISystemStateRepository, SystemStateRepository>();
+builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
 
 builder.Services.AddHostedService<ExchangeRateBackgroundService>();
+
+builder.Services.AddSingleton<ExchangeRateMapper>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<StoreExchangeRatesCommand>());

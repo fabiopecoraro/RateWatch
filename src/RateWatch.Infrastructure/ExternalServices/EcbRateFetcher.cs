@@ -14,7 +14,7 @@ public class EcbRateFetcher(HttpClient _httpClient) : IRateFetcher
 {
     public async Task<ExchangeRateDay?> GetLatestRatesAsync(CancellationToken cancellationToken = default)
     {
-        var stream = await _httpClient.GetStreamAsync(EcbFileUrls.XmlLatestReferenceRates, cancellationToken);
+        var stream = await _httpClient.GetStreamAsync(EcbFileUrls.XmlLatestRates, cancellationToken);
         var serializer = new XmlSerializer(typeof(Envelope));
         var envelope = serializer.Deserialize(stream) as Envelope;
 
@@ -33,5 +33,31 @@ public class EcbRateFetcher(HttpClient _httpClient) : IRateFetcher
         };
 
         return exchday;
+    }
+
+    public async Task<List<ExchangeRateDay>> GetHistoricalRatesAsync(CancellationToken ct = default)
+    {
+        var stream = await _httpClient.GetStreamAsync(EcbFileUrls.XmlHistoricalRates, ct);
+        var serializer = new XmlSerializer(typeof(Envelope));
+        var envelope = serializer.Deserialize(stream) as Envelope;
+
+        if (envelope == null)
+            return [];
+
+        var result = envelope.Cube.Cubes
+            .Where(c => !string.IsNullOrEmpty(c.Time))
+            .Select(day => new ExchangeRateDay
+            {
+                Date = DateOnly.Parse(day.Time),
+                ExchangeRates = day.Rates.Select(r => new ExchangeRate
+                {
+                    FromCurrency = "EUR",
+                    ToCurrency = r.Currency,
+                    Rate = decimal.Parse(r.Rate, CultureInfo.InvariantCulture)
+                }).ToList()
+            })
+            .ToList();
+
+        return result;
     }
 }
