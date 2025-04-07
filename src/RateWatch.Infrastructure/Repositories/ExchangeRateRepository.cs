@@ -25,4 +25,14 @@ public class ExchangeRateRepository(RateWatchDbContext _db) : IExchangeRateRepos
         return await _db.ExchangeRateRecords
             .AnyAsync(r => r.Date == date, cancellationToken);
     }
+
+    public async Task<List<DateOnly>> GetAvailableDatesAsync(CancellationToken ct = default)
+    {
+        return await _db.ExchangeRateRecords
+            .Select(r => r.Date)
+            .Distinct()
+            .OrderByDescending(d => d)
+            .ToListAsync(ct);
+    }
+
 }

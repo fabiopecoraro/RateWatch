@@ -12,4 +12,12 @@ public class CurrencyRepository(RateWatchDbContext _db) : ICurrencyRepository
         return await _db.Currencies
             .ToDictionaryAsync(c => c.Code, c => c.Id, ct);
     }
+
+    public async Task<List<Currency>> GetActiveCurrenciesAsync(CancellationToken ct = default)
+    {
+        return await _db.Currencies
+            .Where(c => c.IsActive)
+            .OrderBy(c => c.Code)
+            .ToListAsync(ct);
+    }
 }

@@ -1,0 +1,87 @@
+﻿@page "/dashboard"
+@inject HttpClient Http
+
+<h1 class="mb-4">Tassi di Cambio</h1>
+
+@if (dates == null)
+{
+    <div class="alert alert-info">Caricamento date...</div>
+}
+else
+{
+    <div class="mb-3">
+        <label for="dateSelect" class="form-label">Seleziona una data:</label>
+        <select id="dateSelect" class="form-select w-auto" @onchange="OnDateSelected">
+            <option value="">-- seleziona --</option>
+            @foreach (var d in dates)
+            {
+                <option value="@d" selected="@(d == selectedDate)">@d</option>
+            }
+        </select>
+    </div>
+}
+
+@if (exchangeRates != null && exchangeRates.Any())
+{
+    <div class="row">
+        @foreach (var rate in exchangeRates)
+        {
+            <div class="col-12 col-sm-6 col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@rate.FromCurrency → @rate.ToCurrency</h5>
+                        <p class="card-text fs-4">@rate.Rate.ToString("#0.##")</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (selectedDate != null)
+{
+    <div class="alert alert-warning">Nessun tasso disponibile per @selectedDate</div>
+}
+
+@code {
+    private List<string>? dates;
+    private string? selectedDate;
+
+    private List<ExchangeRate>? exchangeRates;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dates = await Http.GetFromJsonAsync<List<string>>("/api/rates/dates");
+    }
+
+    private async Task OnDateSelected(ChangeEventArgs e)
+    {
+        selectedDate = e.Value?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(selectedDate))
+        {
+            var response = await Http.GetAsync($"/api/rates/{selectedDate}");
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<ExchangeRateDay>();
+                exchangeRates = result?.ExchangeRates;
+            }
+            else
+            {
+                exchangeRates = new();
+            }
+        }
+    }
+
+    public class ExchangeRateDay
+    {
+        public string Date { get; set; } = string.Empty;
+        public List<ExchangeRate> ExchangeRates { get; set; } = new();
+    }
+
+    public class ExchangeRate
+    {
+        public string FromCurrency { get; set; } = string.Empty;
+        public string ToCurrency { get; set; } = string.Empty;
+        public decimal Rate { get; set; }
+    }
+}
