@@ -1,4 +1,4 @@
-﻿namespace RateWatch.Api.DTOs;
+﻿namespace RateWatch.Api.ViewModels.Responses;
 
 public class CurrencyResponse
 {

@@ -1,9 +1,9 @@
-﻿using RateWatch.Domain.ECB.Commons;
+﻿using RateWatch.Domain.ExternalModels.Commons;
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace RateWatch.Domain.ECB;
+namespace RateWatch.Domain.ExternalModels;
 
 [XmlRoot(ElementName = "Envelope", Namespace = EcbXmlNamespaces.GesmesNamespace)]
 public class Envelope

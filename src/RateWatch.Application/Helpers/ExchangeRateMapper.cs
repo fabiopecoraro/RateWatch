@@ -1,11 +1,11 @@
-﻿using RateWatch.Domain.DTOs;
+﻿using RateWatch.Application.DTOs;
 using RateWatch.Domain.Entities;
 
-namespace RateWatch.Application.Services;
+namespace RateWatch.Application.Helpers;
 
-public class ExchangeRateMapper
+public static class ExchangeRateMapper
 {
-    public List<ExchangeRateRecord> MapToRecords(
+    public static List<ExchangeRateRecord> MapToRecords(
         ExchangeRateDay day,
         Dictionary<string, int> currencyMap)
     {

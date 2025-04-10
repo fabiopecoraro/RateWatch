@@ -1,26 +1,24 @@
-﻿using AutoMapper;
-using MediatR;
-using RateWatch.Application.Interfaces;
-using RateWatch.Application.Services;
-using RateWatch.Domain.Entities;
+﻿using MediatR;
+using RateWatch.Application.Helpers;
+using RateWatch.Application.Interfaces.ExternalServices;
+using RateWatch.Application.Interfaces.Repositories;
 
 namespace RateWatch.Application.ExchangeRates;
 
 public class StoreExchangeRatesHandler(
-    IRateFetcher _fetcher,
-    IExchangeRateRepository _repo,
-    ICurrencyRepository _currencyRepository,
-    ExchangeRateMapper _mapper) : IRequestHandler<StoreExchangeRatesCommand>
+    IRateFetcherService _rateFetcherService,
+    IExchangeRateRepository _excangeRateRepository,
+    ICurrencyRepository _currencyRepository) : IRequestHandler<StoreExchangeRatesCommand>
 {
-    public async Task Handle(StoreExchangeRatesCommand request, CancellationToken cancellationToken)
+    public async Task Handle(StoreExchangeRatesCommand request, CancellationToken ct)
     {
-        var day = await _fetcher.GetLatestRatesAsync(cancellationToken);
-        if (day is null || await _repo.ExistsForDateAsync(day.Date, cancellationToken))
+        var day = await _rateFetcherService.GetLatestRatesAsync(ct);
+        if (day is null || await _excangeRateRepository.ExistsForDateAsync(day.Date, ct))
             return;
 
-        var currencyMap = await _currencyRepository.GetCurrencyMapAsync(cancellationToken);
+        var currencyMap = await _currencyRepository.GetCurrencyMapAsync(ct);
 
-        var records = _mapper.MapToRecords(day, currencyMap);
-        await _repo.AddRatesAsync(records, cancellationToken);
+        var records = ExchangeRateMapper.MapToRecords(day, currencyMap);
+        await _excangeRateRepository.AddRatesAsync(records, ct);
     }
 }

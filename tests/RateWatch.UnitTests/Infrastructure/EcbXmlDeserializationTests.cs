@@ -1,7 +1,6 @@
-﻿using System.Text;
+﻿using RateWatch.Domain.ExternalModels;
+using System.Text;
 using System.Xml.Serialization;
-using RateWatch.Domain.ECB;
-//using RateWatch.Infrastructure.ExternalServices;
 using Xunit;
 
 namespace RateWatch.UnitTests.Infrastructure;

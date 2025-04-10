@@ -3,18 +3,18 @@ using System.Globalization;
 using System.Xml.Serialization;
 using System;
 using System.Net.Http;
-using RateWatch.Domain.ECB;
-using RateWatch.Domain.ECB.Commons;
-using RateWatch.Application.Interfaces;
-using RateWatch.Domain.DTOs;
+using RateWatch.Domain.ExternalModels.Commons;
+using RateWatch.Application.DTOs;
+using RateWatch.Application.Interfaces.ExternalServices;
+using RateWatch.Domain.ExternalModels;
 
 namespace RateWatch.Infrastructure.ExternalServices;
 
-public class EcbRateFetcher(HttpClient _httpClient) : IRateFetcher
+public class RateFetcherService(HttpClient _httpClient) : IRateFetcherService
 {
-    public async Task<ExchangeRateDay?> GetLatestRatesAsync(CancellationToken cancellationToken = default)
+    public async Task<ExchangeRateDay?> GetLatestRatesAsync(CancellationToken ct = default)
     {
-        var stream = await _httpClient.GetStreamAsync(EcbFileUrls.XmlLatestRates, cancellationToken);
+        var stream = await _httpClient.GetStreamAsync(EcbFileUrls.XmlLatestRates, ct);
         var serializer = new XmlSerializer(typeof(Envelope));
         var envelope = serializer.Deserialize(stream) as Envelope;
 

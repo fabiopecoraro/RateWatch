@@ -1,6 +1,6 @@
 ﻿using RateWatch.Domain.Entities;
 
-namespace RateWatch.Application.Interfaces;
+namespace RateWatch.Application.Interfaces.Repositories;
 
 public interface ICurrencyRepository
 {

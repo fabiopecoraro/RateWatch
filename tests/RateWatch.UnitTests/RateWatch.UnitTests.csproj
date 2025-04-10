@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\RateWatch.Domain\RateWatch.Domain.csproj" />
+    <ProjectReference Include="..\..\src\RateWatch.Infrastructure\RateWatch.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

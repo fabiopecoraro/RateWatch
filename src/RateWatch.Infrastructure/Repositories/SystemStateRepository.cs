@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RateWatch.Application.Interfaces;
+using RateWatch.Application.Interfaces.Repositories;
 using RateWatch.Domain.Entities;
 using RateWatch.Infrastructure.Data;
 

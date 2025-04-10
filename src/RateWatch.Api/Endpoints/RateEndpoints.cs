@@ -1,6 +1,7 @@
-﻿using RateWatch.Application.Interfaces;
-using RateWatch.Api.DTOs;
-using RateWatch.Domain.DTOs;
+﻿using RateWatch.Application.DTOs;
+using RateWatch.Application.Interfaces.Repositories;
+using RateWatch.Application.Interfaces.ExternalServices;
+using RateWatch.Api.ViewModels.Responses;
 
 namespace RateWatch.Api.Endpoints;
 
@@ -8,7 +9,7 @@ public static class RateEndpoints
 {
     public static IEndpointRouteBuilder MapRateEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/rates/latest", async (IRateFetcher rateFetcher) =>
+        app.MapGet("/api/rates/latest", async (IRateFetcherService rateFetcher) =>
         {
             var data = await rateFetcher.GetLatestRatesAsync();
             if (data is null)
@@ -70,6 +71,15 @@ public static class RateEndpoints
         {
             var dates = await repo.GetAvailableDatesAsync(ct);
             return Results.Ok(dates);
+        });
+
+        app.MapGet("/api/rates/history", async (string to, IExchangeRateRepository repo, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(to))
+                return Results.BadRequest("Missing currency code.");
+
+            var history = await repo.GetHistoryAsync(to.ToUpperInvariant(), ct);
+            return Results.Ok(history);
         });
 
         return app;

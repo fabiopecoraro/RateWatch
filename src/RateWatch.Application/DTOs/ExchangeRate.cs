@@ -1,4 +1,4 @@
-﻿namespace RateWatch.Domain.DTOs;
+﻿namespace RateWatch.Application.DTOs;
 
 public class ExchangeRate
 {

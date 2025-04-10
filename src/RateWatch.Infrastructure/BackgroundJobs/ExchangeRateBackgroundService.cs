@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RateWatch.Application.ExchangeRates;
-using RateWatch.Application.Interfaces;
+using RateWatch.Application.Interfaces.Repositories;
 
-namespace RateWatch.Infrastructure.Hosted;
+namespace RateWatch.Infrastructure.BackgroundJobs;
 public class ExchangeRateBackgroundService(IServiceProvider _services, ILogger<ExchangeRateBackgroundService> _logger) : BackgroundService
 {
     private const string HISTORY_FLAG = "ExchangeRateHistoryImported";
