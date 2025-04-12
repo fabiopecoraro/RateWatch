@@ -8,6 +8,7 @@ public class ExchangeRateRecord
     public DateOnly Date { get; set; }
 
     public int FromCurrencyId { get; set; }
+
     public int ToCurrencyId { get; set; }
 
     public decimal Rate { get; set; }
@@ -15,5 +16,6 @@ public class ExchangeRateRecord
     public DateTime UpdatedAt { get; set; }
 
     public Currency? FromCurrency { get; set; }
+
     public Currency? ToCurrency { get; set; }
 }

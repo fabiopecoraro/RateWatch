@@ -3,12 +3,12 @@ using System.Globalization;
 using System.Xml.Serialization;
 using System;
 using System.Net.Http;
-using RateWatch.Domain.ExternalModels.Commons;
 using RateWatch.Application.DTOs;
 using RateWatch.Application.Interfaces.ExternalServices;
-using RateWatch.Domain.ExternalModels;
+using RateWatch.Infrastructure.ExternalServices.RateFetcher.Models;
+using RateWatch.Infrastructure.ExternalServices.RateFetcher.Commons;
 
-namespace RateWatch.Infrastructure.ExternalServices;
+namespace RateWatch.Infrastructure.ExternalServices.RateFetcher;
 
 public class RateFetcherService(HttpClient _httpClient) : IRateFetcherService
 {

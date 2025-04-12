@@ -1,4 +1,4 @@
-﻿namespace RateWatch.Domain.ExternalModels.Commons;
+﻿namespace RateWatch.Infrastructure.ExternalServices.RateFetcher.Commons;
 
 internal static class EcbXmlNamespaces
 {

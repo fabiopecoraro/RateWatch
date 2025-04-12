@@ -1,4 +1,4 @@
-﻿namespace RateWatch.Domain.ExternalModels.Commons;
+﻿namespace RateWatch.Infrastructure.ExternalServices.RateFetcher.Commons;
 
 public static class EcbFileUrls
 {

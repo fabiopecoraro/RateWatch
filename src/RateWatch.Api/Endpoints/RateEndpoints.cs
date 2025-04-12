@@ -1,7 +1,7 @@
-﻿using RateWatch.Application.DTOs;
-using RateWatch.Application.Interfaces.Repositories;
-using RateWatch.Application.Interfaces.ExternalServices;
+﻿using MediatR;
 using RateWatch.Api.ViewModels.Responses;
+using RateWatch.Application.Requests.Currencies.Queries;
+using RateWatch.Application.Requests.ExchangeRates.Queries;
 
 namespace RateWatch.Api.Endpoints;
 
@@ -9,76 +9,69 @@ public static class RateEndpoints
 {
     public static IEndpointRouteBuilder MapRateEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/rates/latest", async (IRateFetcherService rateFetcher) =>
+        app.MapGet("/api/rates/latest", async (IMediator mediator, CancellationToken ct) =>
         {
-            var data = await rateFetcher.GetLatestRatesAsync();
-            if (data is null)
-                return Results.NotFound("Dati BCE non disponibili al momento.");
+            var rates = await mediator.Send(new GetLatestRatesQuery(), ct);
+            if (rates.Count == 0)
+                return Results.NotFound();
 
             var response = new ExchangeRateResponse
             {
-                Date = data.Date.ToString("yyyy-MM-dd"),
-                Rates = data.ExchangeRates.Select(r => new ExchangeRateItem
+                Date = rates.First().Date.ToString("yyyy-MM-dd"),
+                Rates = rates.Select(r => new ExchangeRateItem
                 {
-                    From = r.FromCurrency,
-                    To = r.ToCurrency,
+                    From = r.FromCurrencyCode,
+                    To = r.ToCurrencyCode,
                     Rate = r.Rate
                 }).ToList()
             };
 
-            return TypedResults.Ok(response);
-        })
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces<ExchangeRateResponse>();
+            return Results.Ok(response);
+        });
 
-        app.MapGet("/api/rates/{date}", async (DateOnly date, IExchangeRateRepository repo, ICurrencyRepository currencyRepo, CancellationToken ct) =>
+        app.MapGet("/api/rates/{date}", async (DateOnly date, IMediator mediator, CancellationToken ct) =>
         {
-            var records = await repo.GetRatesByDateAsync(date, ct);
-            if (records.Count == 0)
+            var rates = await mediator.Send(new GetRatesByDateQuery(date), ct);
+            if (rates.Count == 0)
                 return Results.NotFound();
 
-            var currencyMap = await currencyRepo.GetCurrencyMapAsync(ct);
-            var reverseMap = currencyMap.ToDictionary(kv => kv.Value, kv => kv.Key);
-
-            var dto = new ExchangeRateDay
+            var response = new ExchangeRateResponse
             {
-                Date = date,
-                ExchangeRates = records.Select(r => new ExchangeRate
+                Date = rates.First().Date.ToString("yyyy-MM-dd"),
+                Rates = rates.Select(r => new ExchangeRateItem
                 {
-                    FromCurrency = reverseMap[r.FromCurrencyId],
-                    ToCurrency = reverseMap[r.ToCurrencyId],
+                    From = r.FromCurrencyCode,
+                    To = r.ToCurrencyCode,
                     Rate = r.Rate
                 }).ToList()
             };
 
-            return Results.Ok(dto);
-        })
-            .Produces(StatusCodes.Status404NotFound)
-            .Produces<ExchangeRateDay>();
+            return Results.Ok(response);
+        });
 
-        app.MapGet("/api/currencies", async (ICurrencyRepository repo, CancellationToken ct) =>
+        app.MapGet("/api/currencies", async (IMediator mediator, CancellationToken ct) =>
         {
-            var currencies = await repo.GetActiveCurrenciesAsync(ct);
+            var currencies = await mediator.Send(new CurrenciesGetAllActiveQuery(), ct);
+
             return Results.Ok(currencies.Select(c => new CurrencyResponse()
             {
                 Code = c.Code,
                 Description = c.Description
             }));
-        }).Produces<CurrencyResponse>();
+        });
 
-
-        app.MapGet("/api/rates/dates", async (IExchangeRateRepository repo, CancellationToken ct) =>
+        app.MapGet("/api/rates/dates", async (IMediator mediator, CancellationToken ct) =>
         {
-            var dates = await repo.GetAvailableDatesAsync(ct);
+            var dates = await mediator.Send(new GetLast100AvailableDatesQuery(), ct);
             return Results.Ok(dates);
         });
 
-        app.MapGet("/api/rates/history", async (string to, IExchangeRateRepository repo, CancellationToken ct) =>
+        app.MapGet("/api/rates/history", async (string to, IMediator mediator, CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(to))
                 return Results.BadRequest("Missing currency code.");
 
-            var history = await repo.GetHistoryAsync(to.ToUpperInvariant(), ct);
+            var history = await mediator.Send(new ExchangeRatesGetHistoryQuery(to.ToUpperInvariant()), ct);
             return Results.Ok(history);
         });
 

@@ -2,15 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RateWatch.Application.ExchangeRates;
-using RateWatch.Application.Interfaces.Repositories;
+using RateWatch.Application.Requests.ExchangeRates.Commands;
+using RateWatch.Application.Requests.SystemStates.Commands;
+using RateWatch.Application.Requests.SystemStates.Queries;
 
 namespace RateWatch.Infrastructure.BackgroundJobs;
 public class ExchangeRateBackgroundService(IServiceProvider _services, ILogger<ExchangeRateBackgroundService> _logger) : BackgroundService
 {
     private const string HISTORY_FLAG = "ExchangeRateHistoryImported";
 
-    public override async Task StartAsync(CancellationToken cancellationToken)
+    public override async Task StartAsync(CancellationToken ct)
     {
         _logger.LogInformation("Avvio servizio ExchangeRateBackgroundService...");
 
@@ -18,17 +19,16 @@ public class ExchangeRateBackgroundService(IServiceProvider _services, ILogger<E
         {
             using var scope = _services.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var systemState = scope.ServiceProvider.GetRequiredService<ISystemStateRepository>();
 
-            var alreadyImported = await systemState.IsFlagSetAsync(HISTORY_FLAG, cancellationToken);
+            var alreadyImported = await mediator.Send(new SystemStateGetFlagStatusQuery(HISTORY_FLAG), ct);
 
             if (!alreadyImported)
             {
                 _logger.LogInformation("Caricamento storico dei tassi in corso...");
-                var imported = await mediator.Send(new StoreExchangeRateHistoryCommand(), cancellationToken);
+                var imported = await mediator.Send(new StoreExchangeRateHistoryCommand(), ct);
                 _logger.LogInformation("Storico completato: {Count} tassi importati.", imported);
 
-                await systemState.SetFlagAsync(HISTORY_FLAG, true, cancellationToken);
+                await mediator.Send(new SystemStateSetFlagCommand(HISTORY_FLAG, true), ct);
             }
             else
             {
@@ -40,14 +40,14 @@ public class ExchangeRateBackgroundService(IServiceProvider _services, ILogger<E
             _logger.LogError(ex, "Errore durante l'import dello storico.");
         }
 
-        await base.StartAsync(cancellationToken);
+        await base.StartAsync(ct);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken ct)
     {
         _logger.LogInformation("HostedService avviato.");
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (!ct.IsCancellationRequested)
         {
             try
             {
@@ -55,7 +55,7 @@ public class ExchangeRateBackgroundService(IServiceProvider _services, ILogger<E
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
                 _logger.LogInformation("Esecuzione fetch giornaliero...");
-                await mediator.Send(new StoreExchangeRatesCommand(), stoppingToken);
+                await mediator.Send(new StoreExchangeRatesCommand(), ct);
                 _logger.LogInformation("Tassi aggiornati.");
             }
             catch (Exception ex)
@@ -63,7 +63,7 @@ public class ExchangeRateBackgroundService(IServiceProvider _services, ILogger<E
                 _logger.LogError(ex, "Errore durante il salvataggio dei tassi.");
             }
 
-            await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
+            await Task.Delay(TimeSpan.FromHours(24), ct);
         }
     }
 }

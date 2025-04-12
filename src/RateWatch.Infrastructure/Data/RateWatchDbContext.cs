@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RateWatch.Domain.DTOs;
 using RateWatch.Domain.Entities;
 using System.Collections.Generic;
 using System.ComponentModel;

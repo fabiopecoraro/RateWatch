@@ -1,4 +1,4 @@
-﻿using RateWatch.Domain.ExternalModels;
+﻿using RateWatch.Infrastructure.ExternalServices.RateFetcher.Models;
 using System.Text;
 using System.Xml.Serialization;
 using Xunit;

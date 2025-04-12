@@ -30,8 +30,4 @@ public class SystemStateRepository(RateWatchDbContext _db) : ISystemStateReposit
 
         await _db.SaveChangesAsync(ct);
     }
-
-    public Task<SystemState?> GetAsync(string key, CancellationToken ct = default)
-        => _db.SystemStates.FindAsync([key], ct).AsTask();
 }
-
