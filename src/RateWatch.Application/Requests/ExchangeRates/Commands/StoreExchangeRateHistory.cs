@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using RateWatch.Application.Interfaces.ExternalServices;
 using RateWatch.Application.Interfaces.Repositories;
-using RateWatch.Domain.DTOs;
+using RateWatch.Domain.Models;
 
 namespace RateWatch.Application.Requests.ExchangeRates.Commands;
 
@@ -16,13 +16,13 @@ public class StoreExchangeRateHistory(
     {
         var allDays = await _rateFetcherService.GetHistoricalRatesAsync(ct);
 
-        var ratesToSave = new List<ExchangeRateDto>();
+        var ratesToSave = new List<ExchangeRateModel>();
         foreach (var day in allDays)
         {
             if (await _exchangeRateRepository.ExistsForDateAsync(day.Date, ct))
                 continue;
 
-            var records = day.ExchangeRates.Select(r => new ExchangeRateDto()
+            var records = day.ExchangeRates.Select(r => new ExchangeRateModel()
             {
                 Date = day.Date,
                 FromCurrencyCode = r.FromCurrency,

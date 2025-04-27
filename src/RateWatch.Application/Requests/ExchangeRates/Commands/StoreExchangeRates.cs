@@ -18,7 +18,7 @@ public class StoreExchangeRates(
         if (day is null || await _excangeRateRepository.ExistsForDateAsync(day.Date, ct))
             return;
 
-        var records = day.ExchangeRates.Select(r => new ExchangeRateDto()
+        var records = day.ExchangeRates.Select(r => new ExchangeRateModel()
         {
             Date = day.Date,
             FromCurrencyCode = r.FromCurrency,

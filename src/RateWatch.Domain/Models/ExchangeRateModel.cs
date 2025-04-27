@@ -1,7 +1,7 @@
-﻿namespace RateWatch.Domain.DTOs;
+﻿namespace RateWatch.Domain.Models;
 
 
-public class ExchangeRateDto
+public class ExchangeRateModel
 {
     public DateOnly Date { get; set; }
 

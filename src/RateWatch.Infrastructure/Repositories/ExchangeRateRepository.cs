@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RateWatch.Application.Interfaces.Repositories;
-using RateWatch.Domain.DTOs;
 using RateWatch.Domain.Entities;
+using RateWatch.Domain.Models;
 using RateWatch.Infrastructure.Data;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -10,7 +10,7 @@ namespace RateWatch.Infrastructure.Repositories;
 
 public class ExchangeRateRepository(RateWatchDbContext _db, IMapper _mapper) : IExchangeRateRepository
 {
-    public async Task AddRatesAsync(IEnumerable<ExchangeRateDto> rates, CancellationToken ct = default)
+    public async Task AddRatesAsync(IEnumerable<ExchangeRateModel> rates, CancellationToken ct = default)
     {
         var now = DateTime.UtcNow;
         var currencies = await _db.Currencies.ToListAsync(cancellationToken: ct);
@@ -28,7 +28,7 @@ public class ExchangeRateRepository(RateWatchDbContext _db, IMapper _mapper) : I
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<List<ExchangeRateDto>> GetRatesByDateAsync(DateOnly date, CancellationToken ct = default)
+    public async Task<List<ExchangeRateModel>> GetRatesByDateAsync(DateOnly date, CancellationToken ct = default)
     {
         var records = await _db.ExchangeRateRecords
             .Include(r => r.FromCurrency)
@@ -36,10 +36,10 @@ public class ExchangeRateRepository(RateWatchDbContext _db, IMapper _mapper) : I
             .Where(r => r.Date == date)
             .ToListAsync(ct);
 
-        return _mapper.Map<List<ExchangeRateDto>>(records);
+        return _mapper.Map<List<ExchangeRateModel>>(records);
     }
 
-    public async Task<List<ExchangeRateDto>> GetLatestRatesAsync(CancellationToken ct = default)
+    public async Task<List<ExchangeRateModel>> GetLatestRatesAsync(CancellationToken ct = default)
     {
         var maxDate = await _db.ExchangeRateRecords
             .Select(r => r.Date)
@@ -54,7 +54,7 @@ public class ExchangeRateRepository(RateWatchDbContext _db, IMapper _mapper) : I
             .Where(r => r.Date == maxDate)
             .ToListAsync(ct);
 
-        return _mapper.Map<List<ExchangeRateDto>>(records);
+        return _mapper.Map<List<ExchangeRateModel>>(records);
     }
 
     public async Task<bool> ExistsForDateAsync(DateOnly date, CancellationToken ct = default)
@@ -73,7 +73,7 @@ public class ExchangeRateRepository(RateWatchDbContext _db, IMapper _mapper) : I
             .ToListAsync(ct);
     }
 
-    public async Task<List<ExchangeRateDto>> GetHistoryAsync(string toCurrencyCode, CancellationToken ct = default)
+    public async Task<List<ExchangeRateModel>> GetHistoryAsync(string toCurrencyCode, CancellationToken ct = default)
     {
         var toCurrencyId = await _db.Currencies
             .Where(c => c.Code == toCurrencyCode)
@@ -88,6 +88,6 @@ public class ExchangeRateRepository(RateWatchDbContext _db, IMapper _mapper) : I
             .OrderBy(r => r.Date)
             .ToListAsync(ct);
 
-        return _mapper.Map<List<ExchangeRateDto>>(records);
+        return _mapper.Map<List<ExchangeRateModel>>(records);
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace RateWatch.Domain.DTOs;
+﻿namespace RateWatch.Domain.Models;
 
-public class CurrencyDto
+public class CurrencyModel
 {
     public string Code { get; set; } = null!;
     public string Description { get; set; } = null!;
